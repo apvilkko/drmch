@@ -1,17 +1,30 @@
 import AudioEngine from './audioengine.js';
-import Sound from './sound.js';
-import trigger from './event.js';
+import InputHandler from './inputhandler.js';
+import Sequencer from './sequencer.js';
+import {Hihat, Kick, Snare} from './sound.js';
 
 class Drmch {
   constructor() {
+    this.inputHandler = new InputHandler();
     this.audioEngine = new AudioEngine();
+    this.createSounds();
+    this.sequencer = new Sequencer(this.audioEngine.context, this.sounds);
+    this.sequencer.scheduler();
+  }
+  createSounds() {
+    let hc = new Hihat(this.audioEngine.context, 'HC');
+    hc.noiseEnvA.releaseTime = 0.05;
+    let ho = new Hihat(this.audioEngine.context, 'HO');
+    ho.noiseEnvA.releaseTime = 0.4;
     this.sounds = new Map()
-      .set('kick', new Sound(this.audioEngine.context, 'kick'))
+      .set('HC', hc)
+      .set('HO', ho)
+      .set('BD', new Kick(this.audioEngine.context, 'BD'))
+      .set('SN', new Snare(this.audioEngine.context, 'SN'))
     ;
-    for (let value of this.sounds.values()) {
-      this.audioEngine.addTrack(value);
+    for (let [key, value] of this.sounds.entries()) {
+      this.audioEngine.addTrack(key, value);
     }
-    trigger('Envelope_gateOn');
   }
 }
 export default Drmch;

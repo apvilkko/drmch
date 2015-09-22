@@ -2,11 +2,12 @@ export class Component {
   constructor(context, name) {
     this.context = context;
     this.name = name || 'Component';
+    //console.log("create", this.name);
     this.input = null;
     this.output = null;
   }
   connect(node) {
-    console.log("connect", node);
+    console.log(`connect ${this.name} => ${node.name ? node.name : node}`, node);
     if (node.input) {
       this.output.connect(node.input);
     } else {
@@ -18,7 +19,7 @@ export class Component {
   }
   addEvent(name, fn) {
     let eventName = this.name + '_' + name;
-    console.log("addEvent", eventName);
+    //console.log("addEvent", eventName);
     document.addEventListener(eventName, fn);
   }
 }
@@ -52,6 +53,10 @@ export class VCA extends Component  {
     this.input = this.gain;
     this.output = this.gain;
     this.amplitude = this.gain.gain;
+
+    this.addEvent('gain', (value) => {
+      this.amplitude.value = value.detail;
+    });
   }
 }
 
@@ -60,9 +65,8 @@ export class Envelope extends Component {
     super(context, name || 'Envelope');
     this.attackTime = 0.05;
     this.releaseTime = 0.4;
-    this.min = 0;
-    this.max = 1;
     this.addEvent('gateOn', () => { this.trigger(); });
+    this.addEvent('gateOff', () => { this.off(); });
   }
   trigger() {
     let now = this.context.currentTime;
@@ -70,6 +74,11 @@ export class Envelope extends Component {
     this.param.setValueAtTime(this.min, now);
     this.param.linearRampToValueAtTime(this.max, now + this.attackTime);
     this.param.linearRampToValueAtTime(this.min, now + this.attackTime + this.releaseTime);
+  }
+  off() {
+    let now = this.context.currentTime;
+    this.param.cancelScheduledValues(now);
+    this.param.setValueAtTime(0, now);
   }
   connect(node, min, max) {
     this.min = min || 0;

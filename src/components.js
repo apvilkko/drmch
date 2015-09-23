@@ -2,12 +2,12 @@ export class Component {
   constructor(context, name) {
     this.context = context;
     this.name = name || 'Component';
-    //console.log("create", this.name);
+    console.log("create", this.name);
     this.input = null;
     this.output = null;
   }
   connect(node) {
-    console.log(`connect ${this.name} => ${node.name ? node.name : node}`, node);
+    //console.log(`connect ${this.name} => ${node.name ? node.name : node}`, node);
     if (node.input) {
       this.output.connect(node.input);
     } else {
@@ -19,7 +19,7 @@ export class Component {
   }
   addEvent(name, fn) {
     let eventName = this.name + '_' + name;
-    //console.log("addEvent", eventName);
+    console.log("addEvent", eventName);
     document.addEventListener(eventName, fn);
   }
 }
@@ -67,6 +67,9 @@ export class Envelope extends Component {
     this.releaseTime = 0.4;
     this.addEvent('gateOn', () => { this.trigger(); });
     this.addEvent('gateOff', () => { this.off(); });
+    this.addEvent('setRelease', (value) => { this.releaseTime = value.detail; });
+    this.addEvent('setMin', (value) => { this.min = value.detail; });
+    this.addEvent('setMax', (value) => { this.max = value.detail; });
   }
   trigger() {
     let now = this.context.currentTime;

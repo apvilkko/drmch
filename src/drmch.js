@@ -1,15 +1,15 @@
 import AudioEngine from './audioengine.js';
-import InputHandler from './inputhandler.js';
+import {InputHandler} from './inputhandler.js';
 import Sequencer from './sequencer.js';
 import {Hihat, Kick, Snare} from './sound.js';
 
 class Drmch {
   constructor() {
-    this.inputHandler = new InputHandler();
     this.audioEngine = new AudioEngine();
     this.createSounds();
     this.sequencer = new Sequencer(this.audioEngine.context, this.sounds);
-    this.sequencer.scheduler();
+    this.inputHandler = new InputHandler();
+    this.sequencer.start();
   }
   createSounds() {
     let hc = new Hihat(this.audioEngine.context, 'HC');

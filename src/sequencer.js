@@ -20,9 +20,18 @@ class Sequencer {
     this.beatsPerBar = 4;
     this.notesPerBeat = Math.round(this.beatsPerBar / this.noteLength);
     this.pattern = PATTERN;
+    this.playing = false;
+    this.pauseRequested = false;
 
     document.addEventListener('tempo', (value) => {
       this.secondsPerBeat = 60.0 / value.detail;
+    });
+    document.addEventListener('playpause', () => {
+      if (this.playing) {
+        this.pauseRequested = true;
+      } else {
+        this.start();
+      }
     });
   }
   scheduleNote() {
@@ -42,8 +51,20 @@ class Sequencer {
       this.currentNote = 0;
     }
   }
+  start () {
+    this.playing = true;
+    this.nextNoteTime = this.context.currentTime;
+    this.scheduler();
+  }
   scheduler() {
-    window.requestAnimationFrame(() => { this.scheduler(); });
+    window.requestAnimationFrame(() => {
+      if (this.pauseRequested) {
+        this.playing = false;
+        this.pauseRequested = false;
+        return;
+      }
+      this.scheduler();
+    });
     if (this.nextNoteTime < this.context.currentTime + this.scheduleAheadTime ) {
       this.scheduleNote();
       this.nextNote();

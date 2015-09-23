@@ -12,6 +12,10 @@ export class Filter extends Component {
     this.frequency = this.filter.frequency;
     this.input = this.filter;
     this.output = this.filter;
+
+    this.addEvent('setFrequency', (value) => {
+      this.filter.frequency.value = value.detail;
+    });
   }
 }
 
